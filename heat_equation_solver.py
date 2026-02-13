@@ -9,7 +9,7 @@ T_initial = 350.0 # Initial Temperature (K)
 T_left = 300.0    # Boundary Condition at x=0 (K)
 T_right = 400.0   # Boundary Condition at x=L (K)
 dx = 0.01         # Spatial step size (m)
-alpha_values = [1.0, 10.0, 100.0] # Thermal Diffusivity (m^2/s)
+alpha_values = [0.0001, 0.001, 0.01] # Thermal Diffusivity (m^2/s)
 check_times = [1.0, 5.0, 10.0, 50.0, 100.0] # Times to capture (s)
 
 # Grid
@@ -214,14 +214,11 @@ for alpha in alpha_values:
     # But for alpha=100, user probably wants to see functionality.
     # Let's use dt_exp for Explicit, and slightly larger for others.
     
-    # Override for High Alpha to avoid infinite wait if SS not detected
-    if alpha == 100:
-       dt_imp = 0.0001 # r = 100 * 1e-4 / 1e-4 = 100. Stable for implicit.
-       # dt_exp must be 5e-7.
-    elif alpha == 10:
-       dt_imp = 0.001
-    else:
-       dt_imp = 0.005 # r = 1 * 0.005 / 1e-4 = 50.
+    # For implicit, we can use a larger timestep, but for these small alphas / short times,
+    # the explicit timestep is already quite large (up to 0.5s).
+    # Let's just use a multiple for implicit/CN or keep it same for accuracy.
+    dt_imp = dt_exp  # Keep them same for direct comparison of errors if needed
+
        
     # Solve
     t0 = time.time()
@@ -273,7 +270,8 @@ for alpha in alpha_values:
         ax.grid(True)
         
     plt.tight_layout()
-    plt.savefig(f"heat_eq_alpha_{int(alpha)}.png", dpi=300)
-    print(f"Saved plot: heat_eq_alpha_{int(alpha)}.png")
+    # plt.savefig(f"heat_eq_alpha_{alpha}.png", dpi=300)
+    # print(f"Saved plot: heat_eq_alpha_{alpha}.png")
+    plt.show()
 
 print("All simulations complete.")
